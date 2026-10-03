@@ -1,0 +1,278 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Raw palette per theme; Tailwind colours point at these so every
+   utility (including /opacity modifiers) follows the active theme. */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14161f;
+  --surface: #1b1e2a;
+  --line: #2a2e3d;
+  --ink: #f2f3f7;
+  --muted: #8a90a6;
+  --lav: #bfcbf0;
+  --lav-deep: #a0ade0;
+  --mint: #7cf2c3;
+  --glyph: #8a90a6;
+  --glyph-hi: #bfcbf0;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f6fa;
+  --surface: #ffffff;
+  --line: #dfe2ec;
+  --ink: #14161f;
+  --muted: #5a6078;
+  --lav: #4c5bb0;
+  --lav-deep: #6b78c4;
+  --mint: #087a52;
+  --glyph: #8a90a6;
+  --glyph-hi: #4c5bb0;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-lav: var(--lav);
+  --color-lav-deep: var(--lav-deep);
+  --color-mint: var(--mint);
+  --color-outline: #0b0c10;
+
+  --font-mono: var(--font-text), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-heading), var(--font-text), ui-monospace, monospace;
+}
+
+html {
+  background: var(--color-bg);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-lav);
+  color: var(--color-bg);
+}
+
+/* In the base layer so utilities (e.g. the search input) can override it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-lav);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* ---------- elephant ---------- */
+
+.ele-breathe {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: ele-breathe 3.6s ease-in-out infinite;
+}
+
+@keyframes ele-breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.035); }
+}
+
+.ele-z {
+  animation: ele-z 3.6s steps(8) infinite;
+  opacity: 0;
+}
+
+@keyframes ele-z {
+  0% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-2px, -3px); }
+}
+
+.ele-blink {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: ele-blink 4.5s infinite;
+}
+
+@keyframes ele-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+.ele-wake {
+  animation: ele-wake 0.5s steps(3) both;
+}
+
+@keyframes ele-wake {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-1.5px); }
+  100% { transform: translateY(0); }
+}
+
+/* ---------- terminal ---------- */
+
+.caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  vertical-align: -0.2em;
+  background: var(--color-lav);
+  animation: caret 1s steps(1) infinite;
+}
+
+@keyframes caret {
+  50% { opacity: 0; }
+}
+
+/* ---------- stack diagram ---------- */
+
+.wire {
+  background-image: linear-gradient(90deg, var(--color-line) 50%, transparent 50%);
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+  background-position: 0 50%;
+  animation: wire-x 0.8s linear infinite;
+}
+
+@keyframes wire-x {
+  to { background-position: 8px 50%; }
+}
+
+.packet {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  translate: 0 -50%;
+  animation: packet-x var(--dur, 3s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.packet-back {
+  animation-name: packet-x-back;
+}
+
+/* Packets stay inside their wire: shift by their own width as they travel. */
+@keyframes packet-x {
+  0% { left: 0%; translate: 0 -50%; opacity: 0; }
+  10%, 85% { opacity: 1; }
+  100% { left: 100%; translate: -100% -50%; opacity: 0; }
+}
+
+@keyframes packet-x-back {
+  0% { left: 100%; translate: -100% -50%; opacity: 0; }
+  10%, 85% { opacity: 1; }
+  100% { left: 0%; translate: 0 -50%; opacity: 0; }
+}
+
+@media (max-width: 767px) {
+  .wire {
+    background-image: linear-gradient(180deg, var(--color-line) 50%, transparent 50%);
+    background-size: 1px 8px;
+    background-repeat: repeat-y;
+    background-position: 50% 0;
+    animation-name: wire-y;
+  }
+
+  @keyframes wire-y {
+    to { background-position: 50% 8px; }
+  }
+
+  .packet {
+    top: 0;
+    left: 50%;
+    translate: -50% 0;
+    animation-name: packet-y;
+  }
+
+  .packet-back {
+    animation-name: packet-y-back;
+  }
+
+  @keyframes packet-y {
+    0% { top: 0%; translate: -50% 0; opacity: 0; }
+    10%, 85% { opacity: 1; }
+    100% { top: 100%; translate: -50% -100%; opacity: 0; }
+  }
+
+  @keyframes packet-y-back {
+    0% { top: 100%; translate: -50% -100%; opacity: 0; }
+    10%, 85% { opacity: 1; }
+    100% { top: 0%; translate: -50% 0; opacity: 0; }
+  }
+}
+
+/* ---------- code ---------- */
+
+.code-block .shiki span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+}
+
+[data-theme="light"] .code-block .shiki span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+}
+
+.code-block pre {
+  background: transparent !important;
+  margin: 0;
+  overflow-x: auto;
+  padding: 1.25rem 1.25rem 1.5rem;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.code-block code {
+  counter-reset: line;
+}
+
+.code-block .line {
+  display: inline-block;
+  min-height: 1lh;
+  animation: line-in 0.35s ease-out both;
+  animation-delay: calc(var(--i, 0) * 28ms);
+}
+
+.code-block .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2ch;
+  margin-right: 1.5ch;
+  text-align: right;
+  color: var(--color-line);
+}
+
+@keyframes line-in {
+  from { opacity: 0; transform: translateX(-6px); clip-path: inset(0 100% 0 0); }
+  to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); }
+}
+
+/* ---------- odometer ---------- */
+
+.odo-strip {
+  transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ele-z, .packet {
+    display: none;
+  }
+}

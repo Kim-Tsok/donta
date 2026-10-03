@@ -1,0 +1,10 @@
+node_modules
+dist
+out
+.next
+.turbo
+.env
+.env.local
+.donta
+*.tsbuildinfo
+next-env.d.ts
