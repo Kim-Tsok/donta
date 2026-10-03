@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Palette per theme. Tailwind colours point at these, so every utility
+   (including /opacity modifiers) follows the active theme. */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14161f;
+  --surface: #1b1e2a;
+  --line: #2a2e3d;
+  --ink: #f2f3f7;
+  --muted: #8a90a6;
+  --lav: #bfcbf0;
+  --lav-deep: #a0ade0;
+  --mint: #7cf2c3;
+  --danger: #ff8a8a;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f6fa;
+  --surface: #ffffff;
+  --line: #dfe2ec;
+  --ink: #14161f;
+  --muted: #5a6078;
+  --lav: #4c5bb0;
+  --lav-deep: #6b78c4;
+  --mint: #087a52;
+  --danger: #c02f2f;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-lav: var(--lav);
+  --color-lav-deep: var(--lav-deep);
+  --color-mint: var(--mint);
+  --color-danger: var(--danger);
+
+  --font-mono: var(--font-text), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-heading), var(--font-text), ui-monospace, monospace;
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-lav);
+  color: var(--color-bg);
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-lav);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* ---------- elephant ---------- */
+
+.ele-breathe {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: ele-breathe 3.6s ease-in-out infinite;
+}
+
+@keyframes ele-breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.035); }
+}
+
+.ele-z {
+  animation: ele-z 3.6s steps(8) infinite;
+  opacity: 0;
+}
+
+@keyframes ele-z {
+  0% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-2px, -3px); }
+}
+
+.ele-blink {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: ele-blink 4.5s infinite;
+}
+
+@keyframes ele-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+.ele-wake {
+  animation: ele-wake 0.5s steps(3) both;
+}
+
+@keyframes ele-wake {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-1.5px); }
+  100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .ele-z {
+    display: none;
+  }
+}
