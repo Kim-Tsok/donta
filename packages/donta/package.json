@@ -1,22 +1,22 @@
 {
   "name": "donta",
   "version": "0.1.0",
-  "description": "Postgres with teeth. Runtime glue for Neon, Drizzle and Better Auth.",
+  "description": "Runtime glue for donta projects: Neon, Drizzle and Better Auth.",
   "license": "MIT",
   "type": "module",
   "exports": {
     "./db": { "types": "./dist/db.d.mts", "default": "./dist/db.mjs" },
     "./env": { "types": "./dist/env.d.mts", "default": "./dist/env.mjs" },
+    "./load-env": { "types": "./dist/load-env.d.mts", "default": "./dist/load-env.mjs" },
     "./drizzle-config": { "types": "./dist/drizzle-config.d.mts", "default": "./dist/drizzle-config.mjs" }
   },
   "files": ["dist"],
+  "engines": { "node": ">=20.12" },
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "typecheck": "tsc -p ."
-  },
-  "dependencies": {
-    "zod": "^4.6.5"
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run"
   },
   "peerDependencies": {
     "@electric-sql/pglite": ">=0.5",
@@ -26,7 +26,6 @@
   },
   "peerDependenciesMeta": {
     "@electric-sql/pglite": { "optional": true },
-    "@neondatabase/serverless": { "optional": true },
     "drizzle-kit": { "optional": true }
   },
   "devDependencies": {
@@ -36,6 +35,7 @@
     "drizzle-kit": "^0.31.11",
     "drizzle-orm": "^0.45.3",
     "tsdown": "^0.23.0",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
   }
 }
