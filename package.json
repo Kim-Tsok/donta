@@ -6,7 +6,11 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "create": "node packages/create-donta/scripts/build.mjs && node packages/create-donta/src/cli.mjs",
+    "test:cli": "node packages/create-donta/scripts/build.mjs && node --test packages/create-donta/test/*.test.mjs",
+    "test:runtime": "npm test --prefix packages/donta",
+    "donta": "node packages/donta/scripts/build.mjs && node packages/donta/bin/donta.mjs"
   },
   "devDependencies": {
     "turbo": "^2.11.7",

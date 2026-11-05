@@ -8,3 +8,8 @@ out
 .donta
 *.tsbuildinfo
 next-env.d.ts
+
+packages/create-donta/assets/
+*.tgz
+
+packages/donta/.cli/

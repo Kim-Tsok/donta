@@ -1,22 +1,41 @@
 {
   "name": "donta",
   "version": "0.1.0",
-  "description": "Runtime glue for donta projects: Neon, Drizzle and Better Auth.",
+  "description": "Postgres and auth for Next.js. Create a project or add donta to an existing app.",
   "license": "MIT",
   "type": "module",
   "exports": {
-    "./db": { "types": "./dist/db.d.mts", "default": "./dist/db.mjs" },
-    "./env": { "types": "./dist/env.d.mts", "default": "./dist/env.mjs" },
-    "./load-env": { "types": "./dist/load-env.d.mts", "default": "./dist/load-env.mjs" },
-    "./drizzle-config": { "types": "./dist/drizzle-config.d.mts", "default": "./dist/drizzle-config.mjs" }
+    "./db": {
+      "types": "./dist/db.d.mts",
+      "default": "./dist/db.mjs"
+    },
+    "./env": {
+      "types": "./dist/env.d.mts",
+      "default": "./dist/env.mjs"
+    },
+    "./load-env": {
+      "types": "./dist/load-env.d.mts",
+      "default": "./dist/load-env.mjs"
+    },
+    "./drizzle-config": {
+      "types": "./dist/drizzle-config.d.mts",
+      "default": "./dist/drizzle-config.mjs"
+    }
   },
-  "files": ["dist"],
-  "engines": { "node": ">=20.12" },
+  "files": [
+    "dist",
+    "bin",
+    ".cli"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
   "scripts": {
-    "build": "tsdown",
+    "build": "node scripts/build.mjs",
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit -p .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepack": "npm run build"
   },
   "peerDependencies": {
     "@electric-sql/pglite": ">=0.5",
@@ -25,8 +44,18 @@
     "drizzle-orm": ">=0.45"
   },
   "peerDependenciesMeta": {
-    "@electric-sql/pglite": { "optional": true },
-    "drizzle-kit": { "optional": true }
+    "@electric-sql/pglite": {
+      "optional": true
+    },
+    "drizzle-kit": {
+      "optional": true
+    },
+    "@neondatabase/serverless": {
+      "optional": true
+    },
+    "drizzle-orm": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
@@ -37,5 +66,11 @@
     "tsdown": "^0.23.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.3"
+  },
+  "bin": {
+    "donta": "bin/donta.mjs"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1"
   }
 }

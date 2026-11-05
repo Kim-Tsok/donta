@@ -1,5 +1,19 @@
 # donta
 
+The package includes the `donta` CLI and database runtime.
+
+```sh
+donta create my-app
+donta add .
+donta add . --dry-run
+donta --help
+```
+
+After npm publication, run without installing globally using `npx donta@latest create my-app`, or install with `npm install -g donta`.
+
+From this repository, use `npm run donta -- create ../my-app` or `npm run donta -- add /path/to/app`. See the root README for local linking and tarball installation.
+
+
 Runtime glue for donta projects: Neon, Drizzle and Better Auth. Projects created with `create-donta` depend on it; you rarely import more than the lines below.
 
 ```ts
@@ -40,7 +54,7 @@ export default defineConfig({ schema: "./lib/schema.ts", out: "./drizzle" });
 ## Develop
 
 ```sh
-pnpm build      # tsdown → dist/
+pnpm build      # Build runtime and bundled CLI
 pnpm test       # vitest (PGlite in memory, no network)
 pnpm typecheck
 ```

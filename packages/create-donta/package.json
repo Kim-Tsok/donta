@@ -1,0 +1,30 @@
+{
+  "name": "create-donta",
+  "version": "0.1.0",
+  "description": "Create a Next.js project with Postgres, Drizzle and Better Auth.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-donta": "src/cli.mjs"
+  },
+  "files": [
+    "src",
+    "assets",
+    "docs"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepack": "npm run build",
+    "test": "node --test",
+    "typecheck": "node --check src/cli.mjs && node --check src/create.mjs && node --check src/integrate.mjs"
+  },
+  "devDependencies": {
+    "donta": "workspace:*"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1"
+  }
+}

@@ -2,7 +2,7 @@
 
 Next.js with Drizzle and Better Auth on Postgres. Neon in production, PGlite on your machine.
 
-This is the reference app for `create-donta`: everything the CLI generates for Next.js is checked against it.
+Created with `create-donta`. Generated projects include the database runtime in `vendor/donta`; keep it committed with your project.
 
 ## Run it
 
@@ -23,6 +23,8 @@ Copy `.env.example` to `.env.local` and set `DATABASE_URL` to your Neon connecti
 pnpm db:migrate
 pnpm dev
 ```
+
+The generator creates `.env.local` with a unique auth secret and localhost URL. Configure these variables separately on your production host.
 
 Production also needs `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) and `BETTER_AUTH_URL`. Without the secret, Better Auth refuses to run when `NODE_ENV=production`.
 
