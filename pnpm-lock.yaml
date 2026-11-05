@@ -214,7 +214,7 @@ importers:
         version: 1.8.1
     devDependencies:
       donta:
-        specifier: workspace:*
+        specifier: workspace:donta-cli@*
         version: link:../donta
 
   packages/donta:
@@ -260,7 +260,7 @@ importers:
         specifier: ^1.7.7
         version: 1.7.7(drizzle-kit@0.31.11)(drizzle-orm@0.45.3(@electric-sql/pglite@0.5.8)(@neondatabase/serverless@1.2.0)(kysely@0.29.6))(next@16.3.8(@types/node@22.20.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@5.0.3(@types/node@22.20.5)(vite@8.3.2(@types/node@22.20.5)))
       donta:
-        specifier: workspace:*
+        specifier: workspace:donta-cli@*
         version: link:../../packages/donta
       drizzle-orm:
         specifier: ^0.45.3

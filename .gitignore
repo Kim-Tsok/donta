@@ -13,3 +13,5 @@ packages/create-donta/assets/
 *.tgz
 
 packages/donta/.cli/
+
+/release/

@@ -3,10 +3,9 @@ export const site = {
   headline: "The full-stack Postgres starter.",
   description:
     "Neon, Drizzle and Better Auth, wired up for Next.js and React in one command.",
-  install: "npm create donta@latest",
+  install: "npx donta-cli@latest",
   links: {
-    // TODO: point these at the real repo and package once published.
-    github: "https://github.com/",
-    npm: "https://www.npmjs.com/package/create-donta",
+    github: "https://github.com/Kim-Tsok/donta",
+    npm: "https://www.npmjs.com/package/donta-cli",
   },
 };

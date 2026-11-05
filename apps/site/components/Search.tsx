@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { DOCS } from "@/lib/docs";
 import { site } from "@/lib/site";
 import { FRAMEWORKS } from "@/lib/snippets";
 import { NODES } from "@/lib/stack";
@@ -19,6 +20,7 @@ type Item = {
 };
 
 function go(hash: string) {
+  if (window.location.pathname !== "/") { window.location.assign(`/${hash}`); return; }
   document.querySelector(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
   history.replaceState(null, "", hash);
 }
@@ -34,6 +36,12 @@ function buildIndex(): Item[] {
       keywords: "stack architecture diagram layers",
       run: () => go("#stack"),
     },
+    ...DOCS.map(section => ({
+      id: `docs-${section.id}`, group: "Page" as const,
+      title: section.title, hint: "Documentation",
+      keywords: section.paragraphs.join(" "),
+      run: () => window.location.assign(`/docs#${section.id}`),
+    })),
     ...NODES.map((n) => ({
       id: `node-${n.name}`,
       group: "Page" as const,
@@ -50,6 +58,7 @@ function buildIndex(): Item[] {
         hint: f.name,
         keywords: file.code,
         run: () => {
+          if (window.location.pathname !== "/") { window.location.assign("/#code"); return; }
           window.dispatchEvent(
             new CustomEvent<ShowCode>(SHOW_CODE_EVENT, { detail: { framework: f.id, file: i } }),
           );
@@ -250,7 +259,7 @@ export function Search() {
             <ul id="search-results" role="listbox" className="max-h-[50vh] overflow-y-auto p-2">
               {results.length === 0 && (
                 <li className="px-3 py-8 text-center text-sm text-muted">
-                  Nothing matches &ldquo;{query}&rdquo;. Full docs are coming soon.
+                  Nothing matches &ldquo;{query}&rdquo;. Try “database”, “authentication” or “existing app”.
                 </li>
               )}
               {results.map((item, i) => {

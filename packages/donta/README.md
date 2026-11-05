@@ -9,7 +9,7 @@ donta add . --dry-run
 donta --help
 ```
 
-After npm publication, run without installing globally using `npx donta@latest create my-app`, or install with `npm install -g donta`.
+Run without installing globally using `npx donta-cli@latest create my-app`, or install with `npm install -g donta-cli`.
 
 From this repository, use `npm run donta -- create ../my-app` or `npm run donta -- add /path/to/app`. See the root README for local linking and tarball installation.
 

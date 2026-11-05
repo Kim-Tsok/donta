@@ -1,5 +1,5 @@
 {
-  "name": "donta",
+  "name": "donta-cli",
   "version": "0.1.0",
   "description": "Postgres and auth for Next.js. Create a project or add donta to an existing app.",
   "license": "MIT",
@@ -72,5 +72,26 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kim-Tsok/donta.git",
+    "directory": "packages/donta"
+  },
+  "homepage": "https://github.com/Kim-Tsok/donta#readme",
+  "bugs": {
+    "url": "https://github.com/Kim-Tsok/donta/issues"
+  },
+  "keywords": [
+    "nextjs",
+    "postgres",
+    "drizzle",
+    "better-auth",
+    "cli",
+    "starter"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

@@ -14,31 +14,31 @@ donta add . --dry-run         # Preview integration
 donta --help
 ```
 
-Until the packages are published, run it from this checkout:
+For local development, run it from this checkout:
 
 ```sh
 npm run donta -- create ../my-app
 npm run donta -- add /path/to/existing-app
 ```
 
-Once `donta` and `create-donta` are published to npm, you can run:
+Both packages are public on npm. From any directory, run:
 
 ```sh
-npx donta@latest create my-app
-npx donta@latest add .
+npx donta-cli@latest create my-app
+npx donta-cli@latest add .
 npm create donta@latest my-app
 ```
 
-Or install globally with `npm install -g donta`, then use `donta create my-app`. The version tag belongs to the package (`donta@latest`), not the subcommand. These commands use the same wizard.
+Or install globally with `npm install -g donta-cli`, then use `donta create my-app`. The version tag belongs to the package (`donta-cli@latest`), not the subcommand. These commands use the same wizard.
 
-To use the short command locally before publishing, build and link the package:
+To use the short command with your local development checkout, build and link the package:
 
 ```sh
 npm run build --prefix packages/donta
 npm link ./packages/donta
 ```
 
-`npm link` registers the `donta` binary with your npm installation. Remove it later with `npm uninstall -g donta`. You can also use `npm pack` in `packages/donta` and install the resulting tarball; packing includes both the CLI assets and database runtime.
+`npm link` registers the `donta` binary with your npm installation. Remove it later with `npm uninstall -g donta-cli`. You can also use `npm pack` in `packages/donta` and install the resulting tarball; packing includes both the CLI assets and database runtime.
 
 ## Start your next project
 
@@ -93,4 +93,4 @@ npm run test:cli        # Build generator assets and test project creation
 npm run test:runtime    # Run runtime tests, including real in-memory Postgres queries
 ```
 
-To create a distributable CLI tarball, run `npm pack` in `packages/create-donta`. Packing rebuilds and includes the template and runtime. The CLI has not been published by this change; use the local command above or install the tarball.
+To create a distributable CLI tarball, run `npm pack` in `packages/create-donta`. Packing rebuilds and includes the template and runtime. The public CLI is published as `donta-cli`; the initializer is published as `create-donta`.

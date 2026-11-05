@@ -4,9 +4,10 @@ import { ThemeToggle } from "./ThemeToggle";
 import { site } from "@/lib/site";
 
 const LINKS = [
-  { label: "home", href: "#top" },
-  { label: "stack", href: "#stack" },
-  { label: "code", href: "#code" },
+  { label: "home", href: "/#top" },
+  { label: "stack", href: "/#stack" },
+  { label: "code", href: "/#code" },
+  { label: "docs", href: "/docs" },
   { label: "github", href: site.links.github, external: true },
   { label: "npm", href: site.links.npm, external: true },
 ];
@@ -14,7 +15,7 @@ const LINKS = [
 export function Nav() {
   return (
     <header className="relative z-20 mx-auto flex max-w-6xl items-center gap-3 px-4 py-6 sm:gap-4 sm:px-8 lg:px-12">
-      <a href="#top" className="flex items-center" aria-label="donta home">
+      <a href="/#top" className="flex items-center" aria-label="donta home">
         <Elephant animated={false} className="h-8 w-auto" title="donta" />
       </a>
       <span className="hidden h-7 w-px shrink-0 bg-ink/70 md:block" aria-hidden="true" />
@@ -29,10 +30,9 @@ export function Nav() {
             {l.label}
           </a>
         ))}
-        <span className="text-muted" title="Coming soon">
-          docs<sup className="ml-0.5 text-[9px] text-lav">soon</sup>
-        </span>
+
       </nav>
+      <a href="/docs" className="ml-auto flex min-h-11 items-center text-sm text-lav md:hidden">docs</a>
       <div className="ml-auto flex items-center gap-2">
         <Search />
         <ThemeToggle />

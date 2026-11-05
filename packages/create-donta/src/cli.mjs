@@ -30,8 +30,8 @@ Options:
   --version, -v          Show the version
 
 Examples:
-  npx donta@latest create my-app
-  npx donta@latest add .
+  npx donta-cli@latest create my-app
+  npx donta-cli@latest add .
   donta add ../my-app --dry-run
   donta add . --yes --skip-install
   npm create donta@latest my-app
@@ -73,7 +73,7 @@ try {
   if (['create', 'add'].includes(positionals[0])) command = positionals.shift();
   const namedCommand = basename(process.argv[1] || '') === 'donta.mjs' || basename(process.argv[1] || '') === 'donta';
   if (namedCommand && !command && positionals.length) {
-    throw new Error(`Unknown command "${positionals[0]}". Use donta create <directory> or donta add <directory>. Version tags go on the package: npx donta@latest create my-app.`);
+    throw new Error(`Unknown command "${positionals[0]}". Use donta create <directory> or donta add <directory>. Version tags go on the package: npx donta-cli@latest create my-app.`);
   }
   if (command === 'create' && values.add) throw new Error('Use either donta create or donta add.');
   if (positionals.length > 1) throw new Error('Supply one project directory.');

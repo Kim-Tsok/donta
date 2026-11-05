@@ -1,6 +1,6 @@
 # create-donta
 
-`npm create donta@latest my-app` is the create-style entry point after npm publication. The `donta` package also ships the same wizard as `donta create my-app` and `donta add .` (or `npx donta@latest create my-app`).
+`npm create donta@latest my-app` is the public create-style entry point. The `donta-cli` package also ships the same wizard as `donta create my-app` and `donta add .` (or `npx donta-cli@latest create my-app`).
 
 Generate a Next.js app with Drizzle, Better Auth and Postgres. Local development uses PGlite; set `DATABASE_URL` to use Neon.
 

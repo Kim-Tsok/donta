@@ -61,5 +61,5 @@ test('create subcommand generates an app and rejects conflicting modes', async t
   assert.match(conflict.stderr, /either donta create or donta add/);
   const help = spawnSync(process.execPath, [cli, 'help'], { encoding: 'utf8' });
   assert.equal(help.status, 0);
-  assert.match(help.stdout, /npx donta@latest create/);
+  assert.match(help.stdout, /npx donta-cli@latest create/);
 });

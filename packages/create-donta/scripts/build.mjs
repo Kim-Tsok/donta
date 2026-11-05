@@ -25,6 +25,8 @@ await rename(resolve(assets, 'next/.gitignore'), resolve(assets, 'next/gitignore
 await mkdir(resolve(assets, 'runtime'), { recursive: true });
 await cp(resolve(root, 'packages/donta/dist'), resolve(assets, 'runtime/dist'), { recursive: true });
 const runtime = JSON.parse(await readFile(resolve(root, 'packages/donta/package.json'), 'utf8'));
+// Keep the generated app’s local runtime import stable as donta/db.
+runtime.name = "donta";
 delete runtime.devDependencies;
 delete runtime.scripts;
 // The vendored application runtime needs neither setup assets nor prompt deps.
