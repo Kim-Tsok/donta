@@ -32,7 +32,7 @@ function buildIndex(): Item[] {
       id: "stack",
       group: "Page",
       title: "How it fits together",
-      hint: "App → Better Auth → Drizzle → Neon",
+      hint: "App → Better Auth → Drizzle → Postgres",
       keywords: "stack architecture diagram layers",
       run: () => go("#stack"),
     },
@@ -92,7 +92,7 @@ function buildIndex(): Item[] {
       id: "npm",
       group: "Links",
       title: "npm",
-      hint: "create-donta",
+      hint: "donta-cli",
       run: () => window.open(site.links.npm, "_blank", "noreferrer"),
     },
   ];

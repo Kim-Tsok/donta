@@ -3,22 +3,22 @@
 export const NODES = [
   {
     name: "Your app",
-    sub: "Next.js · React + Hono",
+    sub: "Next.js App Router",
     wires: ["Typed session helpers", "Protected routes", "Sign-in / sign-up pages"],
   },
   {
     name: "Better Auth",
-    sub: "sessions · OAuth · passkeys",
+    sub: "email / password · sessions",
     wires: ["Mounted at /api/auth/*", "Drizzle adapter configured", "Secret generated for you"],
   },
   {
     name: "Drizzle",
     sub: "schema · queries · migrations",
-    wires: ["Auth tables in your schema", "One migrate command", "Driver chosen per runtime"],
+    wires: ["Auth tables in your schema", "One migrate command", "Local or hosted Postgres"],
   },
   {
-    name: "Neon",
-    sub: "serverless Postgres",
-    wires: ["HTTP driver for edge", "Branch per preview deploy", "Or local PGlite in dev"],
+    name: "Postgres",
+    sub: "PGlite locally · Neon hosted",
+    wires: ["No account needed locally", "Set DATABASE_URL for Neon", "Same schema in both environments"],
   },
 ];

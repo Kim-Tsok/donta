@@ -24,7 +24,7 @@ export function StackDiagram() {
         <Fragment key={n.name}>
           <div
             tabIndex={0}
-            className="group relative rounded-lg border border-line bg-surface p-5 transition-colors hover:border-lav/70 focus-visible:border-lav/70 md:w-40 md:shrink-0 lg:w-48"
+            className="group relative rounded-lg border border-line bg-surface p-5 transition-colors hover:border-lav/70 focus-visible:border-lav/70 md:min-w-0 md:flex-1 md:p-4 lg:p-5"
           >
             <div className="flex items-center gap-2">
               <span className="text-lav">{["◰", "◈", "◇", "◉"][i]}</span>
@@ -40,7 +40,7 @@ export function StackDiagram() {
             </ul>
           </div>
           {i < NODES.length - 1 && (
-            <div className="wire relative mx-auto h-16 w-px md:mx-0 md:mt-14 md:h-px md:w-auto md:min-w-20 md:flex-1" aria-hidden="true">
+            <div className="wire relative mx-auto h-16 w-px md:mx-0 md:mt-14 md:h-px md:w-8 md:shrink-0 lg:w-12" aria-hidden="true">
               {PACKETS[i].map((p) => (
                 <span
                   key={p.g}

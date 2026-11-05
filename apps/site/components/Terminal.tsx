@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/lib/glyphs";
 import { site } from "@/lib/site";
 
@@ -16,41 +16,35 @@ type Step =
   | { kind: "text"; label: string; value: string }
   | { kind: "spin"; text: string; done: string; ms: number };
 
-const SCRIPT: Step[] = [
-  { kind: "type", text: site.install },
-  { kind: "line", parts: [["┌  ", "bar"], ["create-donta", "lav"]], wait: 300 },
-  { kind: "line", parts: [["│", "bar"]] },
-  { kind: "text", label: "Project name", value: "my-app" },
-  { kind: "select", label: "Framework", options: ["Next.js", "React + Hono"], pick: [1] },
-  {
-    kind: "select",
-    label: "Database",
-    options: ["Neon (serverless Postgres)", "Local PGlite (no account)"],
-    pick: [0],
-  },
-  {
-    kind: "select",
-    label: "Auth extras",
-    options: ["Email + password", "Passkeys", "Organizations", "GitHub OAuth"],
-    pick: [0, 1, 3],
-  },
-  { kind: "spin", text: "Installing dependencies", done: "Dependencies installed", ms: 1400 },
-  { kind: "spin", text: "Generating auth schema", done: "Auth schema generated (4 tables)", ms: 800 },
-  { kind: "spin", text: "Writing .env", done: "Wrote .env with a fresh BETTER_AUTH_SECRET", ms: 500 },
-  { kind: "line", parts: [["│", "bar"]] },
-  {
-    kind: "line",
-    parts: [["└  ", "bar"], ["✓ Ready. ", "mint"], ["cd my-app && npm run dev", "ink"]],
-  },
-];
+function scriptFor(mode: "create" | "add"): Step[] {
+  return [
+    { kind: "type", text: site.commands[mode] },
+    { kind: "line", parts: [["┌  ", "bar"], ["donta / a little setup, a lot to build.", "lav"]], wait: 300 },
+    { kind: "line", parts: [["│", "bar"]] },
+    { kind: "select", label: "How would you like to connect Postgres?", options: ["Local Postgres / existing environment", "Connect Neon"], pick: [0] },
+    ...(mode === "add" ? [
+      { kind: "line", parts: [["◇  ", "mint"], ["Your setup plan", "ink"]] },
+      { kind: "line", parts: [["│  + lib/donta/", "muted"]] },
+      { kind: "line", parts: [["│  + app/api/auth/[...all]/route.ts", "muted"]] },
+      { kind: "line", parts: [["│  ~ package.json · .env.local · .gitignore", "muted"]] },
+      { kind: "select", label: "Apply this setup to your project?", options: ["Yes", "No"], pick: [0] },
+    ] as Step[] : []),
+    { kind: "select", label: "Install dependencies?", options: ["Yes", "No"], pick: [0] },
+    { kind: "select", label: "Which package manager?", options: ["npm", "pnpm", "yarn", "bun"], pick: [0] },
+    { kind: "spin", text: mode === "add" ? "Wiring up your backend" : "Creating your project", done: mode === "add" ? "Backend files are ready" : "Your project is ready", ms: 900 },
+    { kind: "spin", text: "Installing dependencies", done: "Dependencies installed", ms: 1100 },
+    { kind: "line", parts: [["│", "bar"]] },
+    { kind: "line", parts: [["└  ", "bar"], [mode === "add" ? "Next: follow DONTA_SETUP.md" : "Next: cd my-app && npm run dev", "mint"]] },
+  ];
+}
 
 // Every line shown when the demo is finished, used for reduced motion.
-function finalLines(): Line[] {
+function finalLines(script: Step[]): Line[] {
   const out: Line[] = [];
   let id = 0;
   const push = (parts: [string, Tone][]) =>
     out.push({ id: id++, parts: parts.map(([text, tone]) => ({ text, tone })) });
-  for (const s of SCRIPT) {
+  for (const s of script) {
     if (s.kind === "type") push([["$ ", "muted"], [s.text, "ink"]]);
     else if (s.kind === "line") push(s.parts);
     else if (s.kind === "text") {
@@ -74,7 +68,8 @@ const toneClass: Record<Tone, string> = {
   bar: "text-line",
 };
 
-export function Terminal({ onDone }: { onDone?: () => void }) {
+export function Terminal({ onDone, mode = "create" }: { onDone?: () => void; mode?: "create" | "add" }) {
+  const script = useMemo(() => scriptFor(mode), [mode]);
   const [lines, setLines] = useState<Line[]>([]);
   const [typing, setTyping] = useState("");
   const [done, setDone] = useState(false);
@@ -104,7 +99,7 @@ export function Terminal({ onDone }: { onDone?: () => void }) {
   useEffect(() => {
     if (!run) return;
     if (prefersReducedMotion()) {
-      setLines(finalLines());
+      setLines(finalLines(script));
       setDone(true);
       onDone?.();
       return;
@@ -135,7 +130,7 @@ export function Terminal({ onDone }: { onDone?: () => void }) {
       setTyping("");
       await sleep(500);
 
-      for (const s of SCRIPT) {
+      for (const s of script) {
         if (s.kind === "type") {
           for (let i = 1; i <= s.text.length; i++) {
             setTyping(s.text.slice(0, i));
@@ -216,7 +211,7 @@ export function Terminal({ onDone }: { onDone?: () => void }) {
     return () => {
       cancelled = true;
     };
-  }, [run, onDone]);
+  }, [run, onDone, script]);
 
   // Keep the newest line in view.
   useEffect(() => {
@@ -237,7 +232,7 @@ export function Terminal({ onDone }: { onDone?: () => void }) {
         <button
           type="button"
           onClick={play}
-          className="ml-auto text-xs text-muted transition-colors hover:text-lav disabled:opacity-40"
+          className="ml-auto min-h-11 px-2 text-xs text-muted transition-colors hover:text-lav disabled:opacity-40"
           disabled={!done}
           aria-label="Replay terminal demo"
         >
@@ -246,12 +241,12 @@ export function Terminal({ onDone }: { onDone?: () => void }) {
       </div>
       <div
         ref={body}
-        className="h-[22rem] overflow-hidden px-4 py-3 text-[13px] leading-[1.65] sm:h-[24rem]"
+        className="h-[25rem] overflow-hidden px-4 py-3 text-[13px] leading-[1.65] sm:h-[28rem]"
         aria-live="off"
       >
         <span className="sr-only">
-          Demo: running {site.install} asks for a project name, framework, database and auth
-          extras, then installs dependencies, generates the auth schema and writes .env.
+          Demo: running {site.commands[mode]} configures Postgres, adds database and auth files,
+          creates a private .env.local file, and installs dependencies. Existing apps get a change preview and integration guide.
         </span>
         <div aria-hidden="true">
           {lines.map((l) => (
