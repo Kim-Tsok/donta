@@ -28,6 +28,12 @@ The generator creates `.env.local` with a unique auth secret and localhost URL. 
 
 Production also needs `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) and `BETTER_AUTH_URL`. Without the secret, Better Auth refuses to run when `NODE_ENV=production`.
 
+## Dependency security
+
+Commit your lockfile and run your package manager's dependency audit before deployment and after updates. The template requires Next.js 16.4.5 or newer in the 16.x series. It includes npm/Bun overrides, pnpm overrides, and Yarn resolutions for the patched esbuild used by Drizzle's legacy loader and Zod used by authentication. Keep these until the upstream dependency ranges no longer need them; rerun migrations and builds when changing them.
+
+For an existing app, upgrading the donta CLI does not upgrade that app's dependencies. Review and update its Next.js, auth dependencies, lockfile, and audit findings separately.
+
 ## Where things are
 
 | File | What it does |

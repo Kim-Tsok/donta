@@ -69,6 +69,18 @@ Automatic integration supports TypeScript App Router projects, including `src/ap
 
 See the [existing-project guide](packages/create-donta/docs/existing-projects.md) for exact changes, examples, compatibility, and troubleshooting.
 
+## Shared coding-agent workflow (0.2.0+)
+
+One setup for Codex, Claude Code, Gemini CLI and optional Cursor support:
+
+```sh
+npm run donta -- agents /path/to/your-app
+```
+
+The updated local CLI also supports `donta agents . --dry-run` and `donta agents . --agents all`. It creates shared project instructions, agent adapters, a task template and a handoff template. New projects include Codex, Claude and Gemini guidance by default. Existing instruction files and working notes are preserved.
+
+Read the [agent workflow guide](packages/create-donta/docs/agents.md) for setup, task prompts, review, handoff, compatibility and refresh behavior. Agent setup writes project guidance; each coding agent still needs its own installation and authentication.
+
 ## Make it yours
 
 Edit `lib/schema.ts`, then run `npm run db:generate` and `npm run db:migrate`. Stop the development server before migrating local PGlite, since only one process can open its data directory. Replace `app/dashboard/page.tsx` with your product's first protected screen.
@@ -80,6 +92,18 @@ The generated README describes the auth files, schema workflow, and available sc
 Use a persistent hosted database for production. Set `DATABASE_URL` to a Neon connection string, `BETTER_AUTH_URL` to your public origin, and `BETTER_AUTH_SECRET` to a private random value (`openssl rand -base64 32`). Configure these on your host; `.env.local` is not committed. Run `npm run db:migrate` against that database as a release step, then `npm run build` and `npm start`. Deployments must use the Node.js runtime.
 
 Email/password authentication is included. Password reset emails, email verification and social providers require configuring Better Auth for your application.
+
+## Package download counts (0.2.0+)
+
+```sh
+npm run donta -- stats
+npm run donta -- stats --period last-month
+npm run donta -- stats --json
+```
+
+The local CLI also exposes `donta stats`. It reads npm's public download API for `donta-cli` and `create-donta`, separately, with the reporting dates. No account or API key is needed. Supported periods are `last-day`, `last-week` (default), and `last-month`.
+
+Download counts measure registry downloads, not unique users or CLI runs. Downloads from the two entry points do not reveal how many people chose new projects versus existing apps. CLI usage telemetry is not collected. Failed API requests are reported as unavailable, never as zero, and return a nonzero exit code. `--json` provides the same data for scripts.
 
 ## Repository
 

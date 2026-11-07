@@ -24,3 +24,11 @@ Generated projects include a private `.env.local` with a unique auth secret and 
 Run `npm run build` before `npm test`. The builder snapshots `templates/next` and rebuilds `packages/donta` into `assets/`. Generated build output, local databases, dependencies and environment secrets are excluded.
 
 `npm pack` rebuilds these assets automatically and creates an installable CLI tarball. Clack provides interactive prompts; application dependencies are installed in the generated project.
+
+## Coding agents (0.2.0+)
+
+Use `donta agents .` for shared Codex, Claude Code and Gemini CLI guidance; add Cursor with `--agents all`. New projects include the default agent workflow. See [the agent workflow guide](docs/agents.md).
+
+## Download statistics (0.2.0+)
+
+Run `donta stats` for public npm downloads of both entry points. Use `--period last-month` or `--json`. Counts are downloads, not unique users. No create/add usage telemetry is collected, so those modes cannot be compared from download data.

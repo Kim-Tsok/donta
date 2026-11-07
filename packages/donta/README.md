@@ -58,3 +58,11 @@ pnpm build      # Build runtime and bundled CLI
 pnpm test       # vitest (PGlite in memory, no network)
 pnpm typecheck
 ```
+
+## Coding-agent workflow (0.2.0+)
+
+`donta agents .` prepares shared project context, task planning and cross-agent handoffs for Codex, Claude Code, Gemini CLI and optional Cursor support. Use `--dry-run` to inspect changes. New projects include the three default adapters.
+
+## Download statistics (0.2.0+)
+
+Run `donta stats` for public npm downloads of both entry points. Use `--period last-month` or `--json`. Counts are downloads, not unique users. No create/add usage telemetry is collected, so those modes cannot be compared from download data.

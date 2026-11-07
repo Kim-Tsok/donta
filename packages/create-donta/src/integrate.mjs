@@ -1,5 +1,6 @@
-import { readFile, readdir, lstat, mkdir, writeFile, rm } from 'node:fs/promises';
-import { resolve, dirname, relative, sep } from 'node:path';
+import { readFile, readdir, lstat, mkdir, open, writeFile, rm } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { resolve, dirname, relative, sep, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateDatabaseUrl } from './database.mjs';
 import { randomBytes } from 'node:crypto';
@@ -8,7 +9,29 @@ const assets = fileURLToPath(new URL('../assets/', import.meta.url));
 const missing = (error) => { if (error.code === 'ENOENT') return undefined; throw error; };
 const read = (path) => readFile(path, 'utf8').catch(missing);
 
-async function safePath(root, file) {
+function addSecurityOverrides(pkg, template) {
+  const pins = [
+    ['@esbuild-kit/core-utils', 'esbuild', template.overrides['@esbuild-kit/core-utils'].esbuild],
+    ...['better-auth', '@better-auth/core', 'better-call'].map(parent => [parent, 'zod', template.overrides.zod]),
+  ];
+  const set = (object, key, value) => {
+    if (object[key] !== undefined && object[key] !== value) throw new Error(`Conflicting dependency override for ${key}. Merge the patched dependency versions manually before running setup.`);
+    object[key] = value;
+  };
+  for (const [parent, dependency, version] of pins) {
+    const npm = pkg.overrides ??= {};
+    // Preserve an existing override of the parent package itself.
+    if (typeof npm[parent] === 'string') npm[parent] = { '.': npm[parent] };
+    set(npm[parent] ??= {}, dependency, version);
+    set(((pkg.pnpm ??= {}).overrides ??= {}), `${parent}>${dependency}`, version);
+    set(pkg.resolutions ??= {}, `${parent}/${dependency}`, version);
+  }
+}
+
+export async function safePath(root, file) {
+  if (isAbsolute(file) || file.includes('\\') || file.includes('\0') || file.split('/').some(part => !part || part === '.' || part === '..')) {
+    throw new Error('Setup paths must stay inside the project.');
+  }
   let current = root;
   for (const segment of file.split('/')) {
     current = resolve(current, segment);
@@ -69,7 +92,19 @@ export async function planIntegration(target, { cwd = process.cwd(), databaseUrl
   const authRoot = `${app}/api/auth`;
   if (await exists(authRoot)) throw new Error(`${authRoot} already exists. Keep your current auth routes and follow docs/existing-projects.md.`);
   const template = JSON.parse(await readFile(resolve(assets, 'next/package.json'), 'utf8'));
+  addSecurityOverrides(pkg, template);
+  let inParentWorkspace = false;
+  for (let parent = dirname(root); ; parent = dirname(parent)) {
+    if (await lstat(resolve(parent, 'pnpm-workspace.yaml')).catch(missing)) { inParentWorkspace = true; break; }
+    if (parent === dirname(parent)) break;
+  }
+  if (!inParentWorkspace && !await exists('pnpm-workspace.yaml')) {
+    // pnpm 12 no longer reads package.json's pnpm.overrides field. YAML accepts
+    // JSON syntax, so keep these scoped policies identical across versions.
+    files.set('pnpm-workspace.yaml', JSON.stringify({ overrides: pkg.pnpm.overrides }, null, 2) + '\n');
+  }
   const warnings = [];
+  warnings.push('Run a dependency audit after installing. In a monorepo, apply the generated dependency overrides at the workspace root. Existing Next.js versions are preserved; update them separately.');
   for (const name of ['@electric-sql/pglite', '@neondatabase/serverless', 'better-auth', 'drizzle-orm']) {
     if (!pkg.dependencies?.[name] && !pkg.devDependencies?.[name]) (pkg.dependencies ??= {})[name] = template.dependencies[name];
     else warnings.push(`Keeping your existing ${name} version; check compatibility with donta.`);
@@ -127,8 +162,19 @@ export async function applyIntegration(plan) {
       written.push([file, undefined]);
     }
     for (const [file, { before, after }] of plan.modifications) {
-      await writeFile(resolve(plan.root, file), after, { mode: file === '.env.local' ? 0o600 : 0o644 });
-      written.push([file, before]);
+      // mode in writeFile only protects newly created files. Restrict existing
+      // env files before adding secrets, and refuse final-component symlinks
+      // or hard links rather than modifying another file through them.
+      const handle = await open(resolve(plan.root, file), constants.O_WRONLY | (constants.O_NOFOLLOW || 0) |
+        (before === undefined ? constants.O_CREAT | constants.O_EXCL : 0), file === '.env.local' ? 0o600 : 0o644);
+      try {
+        const stat = await handle.stat();
+        if (!stat.isFile() || stat.nlink > 1) throw new Error(`Cannot modify ${file}: expected a regular file with no hard links.`);
+        if (file === '.env.local') await handle.chmod(0o600);
+        written.push([file, before]);
+        await handle.truncate(0);
+        await handle.writeFile(after);
+      } finally { await handle.close(); }
     }
   } catch (error) {
     for (const [file, before] of written.reverse()) {

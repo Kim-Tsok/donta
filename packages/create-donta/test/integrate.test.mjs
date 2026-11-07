@@ -1,10 +1,40 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, readdir, writeFile, rm, symlink } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, writeFile, rm, symlink, stat, chmod, link } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { planIntegration, applyIntegration } from '../src/integrate.mjs';
+import { planIntegration, applyIntegration, safePath } from '../src/integrate.mjs';
+
+test('rejects paths outside the project before filesystem access', async () => {
+  for (const file of ['../secret', '/tmp/secret', 'lib/../../secret', 'lib\\secret', './secret']) {
+    await assert.rejects(safePath('/tmp/project', file), /inside the project/);
+  }
+});
+
+test('restricts an existing env file before adding a secret', { skip: process.platform === 'win32' }, async t => {
+  const root = await fixture(t);
+  const env = resolve(root, '.env.local');
+  await writeFile(env, 'MY_SETTING=keep\n');
+  await chmod(env, 0o644);
+  await applyIntegration(await planIntegration(root));
+  assert.equal((await stat(env)).mode & 0o777, 0o600);
+  assert.match(await readFile(env, 'utf8'), /^MY_SETTING=keep\n/);
+  assert.match(await readFile(env, 'utf8'), /BETTER_AUTH_SECRET=/);
+});
+
+test('refuses hard-linked environment files without exposing a generated secret', async t => {
+  const root = await fixture(t);
+  const outside = await fixture(t);
+  const original = 'KEEP=private\n';
+  await writeFile(resolve(outside, 'env'), original);
+  await link(resolve(outside, 'env'), resolve(root, '.env.local'));
+  const manifest = await readFile(resolve(root, 'package.json'), 'utf8');
+  await assert.rejects(applyIntegration(await planIntegration(root)), /regular file/);
+  assert.equal(await readFile(resolve(outside, 'env'), 'utf8'), original);
+  assert.equal(await readFile(resolve(root, 'package.json'), 'utf8'), manifest);
+  await assert.rejects(readFile(resolve(root, 'donta.config.ts')), /ENOENT/);
+});
 
 async function fixture(t, app = 'app') {
   const root = await mkdtemp(resolve(tmpdir(), 'donta-integrate-'));
@@ -24,12 +54,18 @@ test('root and src App Router integrations preserve app files, env, scripts and 
     const before = await readdir(root);
     const plan = await planIntegration(root);
     assert.deepEqual(await readdir(root), before, 'planning must not write');
-    assert.equal(plan.warnings.length, 1);
+    assert.ok(plan.warnings.some(warning => warning.includes('existing DATABASE_URL')));
     await applyIntegration(plan);
     const pkg = JSON.parse(await readFile(resolve(root, 'package.json')));
     assert.equal(pkg.scripts.dev, 'next dev --port 4000');
     assert.equal(pkg.dependencies.next, '^16.3.8');
     assert.equal(pkg.dependencies.donta, 'file:./vendor/donta');
+    assert.equal(pkg.overrides['@esbuild-kit/core-utils'].esbuild, '^0.25.12');
+    assert.equal(pkg.overrides['better-auth'].zod, '^4.6.6');
+    assert.equal(pkg.pnpm.overrides['@esbuild-kit/core-utils>esbuild'], '^0.25.12');
+    assert.equal(pkg.resolutions['@esbuild-kit/core-utils/esbuild'], '^0.25.12');
+    const workspace = JSON.parse(await readFile(resolve(root, 'pnpm-workspace.yaml'), 'utf8'));
+    assert.equal(workspace.overrides['better-auth>zod'], '^4.6.6');
     assert.equal(pkg.scripts['donta:migrate'], 'drizzle-kit migrate --config=donta.config.ts');
     assert.equal(await readFile(resolve(root, app, 'page.tsx'), 'utf8'), page);
     const env = await readFile(resolve(root, '.env.local'), 'utf8');
@@ -41,6 +77,38 @@ test('root and src App Router integrations preserve app files, env, scripts and 
     await readFile(resolve(root, 'drizzle-donta/0000_init.sql'));
     await assert.rejects(planIntegration(root), /already installed|already exists/);
   }
+});
+
+test('security overrides preserve existing pins and reject conflicts before writes', async t => {
+  const root = await fixture(t);
+  const path = resolve(root, 'package.json');
+  const pkg = JSON.parse(await readFile(path, 'utf8'));
+  pkg.overrides = { unrelated: '1.2.3', 'better-call': '1.4.0' };
+  await writeFile(path, JSON.stringify(pkg));
+  const planned = JSON.parse((await planIntegration(root)).modifications.get('package.json').after);
+  assert.equal(planned.overrides.unrelated, '1.2.3');
+  assert.deepEqual(planned.overrides['better-call'], { '.': '1.4.0', zod: '^4.6.6' });
+  pkg.overrides['@esbuild-kit/core-utils'] = { esbuild: '0.18.20' };
+  const before = JSON.stringify(pkg);
+  await writeFile(path, before);
+  await assert.rejects(planIntegration(root), /Conflicting dependency override/);
+  assert.equal(await readFile(path, 'utf8'), before);
+  await assert.rejects(readFile(resolve(root, 'donta.config.ts')), /ENOENT/);
+});
+
+test('integration keeps an existing parent workspace in control', async t => {
+  const parent = await fixture(t);
+  const root = resolve(parent, 'apps/existing');
+  await mkdir(resolve(root, 'app'), { recursive: true });
+  await writeFile(resolve(root, 'package.json'), await readFile(resolve(parent, 'package.json')));
+  await writeFile(resolve(root, 'tsconfig.json'), '{}');
+  const workspace = 'packages:\n  - apps/*\n';
+  await writeFile(resolve(parent, 'pnpm-workspace.yaml'), workspace);
+  const plan = await planIntegration(root);
+  assert.equal(plan.files.has('pnpm-workspace.yaml'), false);
+  assert.ok(plan.warnings.some(warning => warning.includes('workspace root')));
+  await applyIntegration(plan);
+  assert.equal(await readFile(resolve(parent, 'pnpm-workspace.yaml'), 'utf8'), workspace);
 });
 
 test('conflicts and unsupported projects leave files unchanged', async t => {

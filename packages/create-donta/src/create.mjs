@@ -1,5 +1,7 @@
 import { cp, mkdir, readFile, readdir, realpath, rename, writeFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
+import { planAgentSetup, DEFAULT_AGENTS, parseAgents } from './agents.mjs';
+import { applyIntegration } from './integrate.mjs';
 import { validateDatabaseUrl } from './database.mjs';
 import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -14,7 +16,9 @@ export function projectName(target) {
   return name;
 }
 
-export async function createProject(target, { cwd = process.cwd(), databaseUrl } = {}) {
+export async function createProject(target, { cwd = process.cwd(), databaseUrl, agents = DEFAULT_AGENTS, packageManager } = {}) {
+  if (packageManager && !['npm', 'pnpm', 'yarn', 'bun'].includes(packageManager)) throw new Error('Unsupported package manager.');
+  agents = parseAgents(agents.join(","));
   if (databaseUrl && validateDatabaseUrl(databaseUrl)) throw new Error(validateDatabaseUrl(databaseUrl));
   const destination = resolve(cwd, target);
   const name = projectName(destination);
@@ -39,6 +43,10 @@ export async function createProject(target, { cwd = process.cwd(), databaseUrl }
   // A local package keeps the result usable before donta is published to npm.
   manifest.dependencies.donta = 'file:./vendor/donta';
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+  // pnpm 12 moved overrides out of package.json. Generate this only in the
+  // app, so the repository template remains part of the parent workspace.
+  await writeFile(resolve(destination, 'pnpm-workspace.yaml'), JSON.stringify({ overrides: manifest.pnpm.overrides }, null, 2) + '\n', { flag: 'wx' });
   await writeFile(resolve(destination, '.env.local'), `# Generated for this project. Keep this file private.\nBETTER_AUTH_SECRET="${randomBytes(32).toString('base64')}"\nBETTER_AUTH_URL="http://localhost:3000"\n${databaseUrl ? `DATABASE_URL="${databaseUrl}"` : '# DATABASE_URL="your Neon connection string"'}\n`, { mode: 0o600, flag: 'wx' });
+  if (agents.length) await applyIntegration(await planAgentSetup(destination, { agents, packageManager }));
   return { destination, name };
 }

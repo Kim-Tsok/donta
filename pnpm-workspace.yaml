@@ -2,6 +2,10 @@ packages:
   - apps/*
   - packages/*
   - templates/*
+overrides:
+  '@esbuild-kit/core-utils>esbuild': ^0.25.12
+  zod: ^4.6.6
+  'vite@>=8.3.0 <8.3.3': ^8.3.3
 minimumReleaseAgeExclude:
   - '@turbo/darwin-64@2.11.7'
   - '@turbo/darwin-arm64@2.11.7'

@@ -20,10 +20,20 @@ test('generates standalone apps with migrations, runtime and unique secrets', as
   const pkg = JSON.parse(await readFile(resolve(dir, 'package.json')));
   assert.equal(pkg.name, 'first-app');
   assert.equal(pkg.dependencies.donta, 'file:./vendor/donta');
+  assert.equal(pkg.dependencies.next, '^16.4.5');
+  assert.equal(pkg.overrides['@esbuild-kit/core-utils'].esbuild, '^0.25.12');
+  assert.equal(pkg.overrides.zod, '^4.6.6');
+  assert.equal(pkg.pnpm.overrides['@esbuild-kit/core-utils>esbuild'], '^0.25.12');
+  assert.equal(pkg.resolutions['@esbuild-kit/core-utils/esbuild'], '^0.25.12');
+  assert.match(await readFile(resolve(dir, 'pnpm-workspace.yaml'), 'utf8'), /@esbuild-kit\/core-utils>esbuild/);
   assert.ok(!JSON.stringify(pkg).includes('workspace:'));
   await readFile(resolve(dir, 'vendor/donta/dist/db.mjs'));
   await readFile(resolve(dir, 'drizzle/0000_init.sql'));
   await readFile(resolve(dir, '.gitignore'));
+  await readFile(resolve(dir, 'GEMINI.md'));
+  assert.match(await readFile(resolve(dir, 'AGENTS.md'), 'utf8'), /donta shared agent workflow/);
+  await readFile(resolve(dir, '.agents/donta/TASK.md'));
+  await readFile(resolve(dir, '.agents/donta/HANDOFF.md'));
   const env = await readFile(resolve(dir, '.env.local'), 'utf8');
   assert.match(env, /BETTER_AUTH_SECRET="[A-Za-z0-9+/=]{44}"/);
   assert.notEqual(env, await readFile(resolve(cwd, 'second-app/.env.local'), 'utf8'));
@@ -53,9 +63,10 @@ test('CLI handles help, invalid options and noninteractive invocation', async ()
 test('create subcommand generates an app and rejects conflicting modes', async t => {
   const cwd = await fixture(t);
   const cli = new URL('../src/cli.mjs', import.meta.url).pathname;
-  const created = spawnSync(process.execPath, [cli, 'create', 'command-app', '--skip-install'], { cwd, encoding: 'utf8' });
+  const created = spawnSync(process.execPath, [cli, 'create', 'command-app', '--skip-install', '--package-manager', 'pnpm'], { cwd, encoding: 'utf8' });
   assert.equal(created.status, 0, created.stderr);
   await readFile(resolve(cwd, 'command-app/package.json'));
+  assert.match(await readFile(resolve(cwd, 'command-app/AGENTS.md'), 'utf8'), /pnpm run build/);
   const conflict = spawnSync(process.execPath, [cli, 'create', 'conflict-app', '--add', '--skip-install'], { cwd, encoding: 'utf8' });
   assert.equal(conflict.status, 1);
   assert.match(conflict.stderr, /either donta create or donta add/);

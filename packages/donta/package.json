@@ -1,6 +1,6 @@
 {
   "name": "donta-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Postgres and auth for Next.js. Create a project or add donta to an existing app.",
   "license": "MIT",
   "type": "module",
